@@ -1,11 +1,12 @@
 {
   "name": "otherwhere",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "A cinematic atlas of impossible worlds.",
+  "description": "A playable 3D observatory with a Go WebAssembly universe.",
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "build:engine": "node scripts/build-engine.mjs",
     "build": "node scripts/build.mjs",
     "check": "node scripts/check.mjs"
   },

@@ -1,126 +1,32 @@
+import { initObservatory } from './observatory.js';
 const worlds = [...document.querySelectorAll('.world')];
-const chapterButtons = [...document.querySelectorAll('.chapter')];
-const atlasCards = [...document.querySelectorAll('.atlas-card')];
 const dialogs = [...document.querySelectorAll('dialog')];
 const stage = document.querySelector('#stage');
 const canvas = document.querySelector('#particles');
 const ctx = canvas.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const names = ['The Pale Frontier', 'The Sleeping Sun', 'The Lunar Shore', 'The Crimson Oath', 'The Blue Hour'];
-const colors = ['#203d35', '#493b31', '#e5e6d0', '#a12d2b', '#e1e4cc'];
 const themes = ['#c5d3c8', '#d4a088', '#335f70', '#dad5c3', '#142d2e'];
-const duration = 14000;
 let current = 0;
-let busy = false;
-let queued = null;
 let motionPaused = reducedMotion.matches;
-let drifting = false;
-let driftStarted = 0;
-let driftTimer;
-let frame;
-let previousFrame = 0;
-let lastDraw = 0;
-let lastWheel = 0;
-let pointer = { x: 0, y: 0 };
-let camera = { x: 0, y: 0 };
-let width = 0;
-let height = 0;
-let particles = [];
-let visited = new Set([0]);
-try {
-  const stored = JSON.parse(localStorage.getItem('otherwhere-visited') || '[]');
-  if (Array.isArray(stored)) stored.filter(x => Number.isInteger(x) && x >= 0 && x < 5).forEach(x => visited.add(x));
-} catch { /* Storage is optional, including in private browsing. */ }
+let frame, previousFrame = 0, lastDraw = 0;
+let pointer = { x: 0, y: 0 }, camera = { x: 0, y: 0 };
+let width = 0, height = 0, particles = [];
+const drifting = false, driftStarted = 0, duration = 14000;
+const setDrifting = () => {};
 
-function remember(index) {
-  visited.add(index);
-  try { localStorage.setItem('otherwhere-visited', JSON.stringify([...visited])); } catch { /* Keep the session usable. */ }
-}
-
-function updateNavigation() {
-  chapterButtons.forEach((button, index) => {
-    const active = current === index;
-    button.classList.toggle('selected', active);
-    if (active) button.setAttribute('aria-current', 'true');
-    else button.removeAttribute('aria-current');
-  });
-  atlasCards.forEach((card, index) => {
-    card.querySelector('.card-visit').textContent = index === current ? 'Currently here' : visited.has(index) ? 'Wandered here' : '';
-    if (index === current) card.setAttribute('aria-current', 'true');
-    else card.removeAttribute('aria-current');
-  });
-  document.querySelector('#current-number').textContent = String(current + 1).padStart(2, '0');
-  document.body.dataset.world = current;
-  document.querySelector('meta[name="theme-color"]').content = themes[current];
-}
-
-function transitionFor(index) {
-  if (motionPaused || reducedMotion.matches) return { keyframes: [{ opacity: 0 }, { opacity: 1 }], duration: 180 };
-  const transitions = [
-    { keyframes: [{ clipPath: 'polygon(0% 0%, 0% 0%, -20% 100%, 0% 100%)' }, { clipPath: 'polygon(0% 0%, 120% 0%, 100% 100%, 0% 100%)' }], duration: 1200 },
-    { keyframes: [{ clipPath: 'ellipse(0% 0% at 74% 52%)' }, { clipPath: 'ellipse(150% 150% at 74% 52%)' }], duration: 1450 },
-    { keyframes: [{ clipPath: 'circle(0% at 72% 46%)' }, { clipPath: 'circle(140% at 72% 46%)' }], duration: 1500 },
-    { keyframes: [{ clipPath: 'polygon(100% 0%, 100% 0%, 140% 100%, 100% 100%)' }, { clipPath: 'polygon(-40% 0%, 100% 0%, 140% 100%, 0% 100%)' }], duration: 1150 },
-    { keyframes: [{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)' }], duration: 1800 }
-  ];
-  return transitions[index];
-}
-
-async function travel(index, { manual = true, hash = true, instant = false } = {}) {
-  index = (index + worlds.length) % worlds.length;
-  if (manual) setDrifting(false);
-  if (busy) { queued = { index, manual, hash }; return; }
-  if (index === current) return;
-  busy = true;
-  const outgoing = worlds[current];
+async function travel(index) {
   const incoming = worlds[index];
-  // Wait for the actual image, so a transition never reveals an unloaded frame.
-  try { await incoming.querySelector('.artwork').decode(); } catch { /* An alt description remains available if an asset fails. */ }
+  try { await incoming.querySelector('.artwork').decode(); } catch {}
+  worlds.forEach((world, i) => {
+    world.classList.toggle('current', i === index);
+    world.inert = i !== index;
+  });
   current = index;
-  remember(index);
-  outgoing.classList.remove('current');
-  outgoing.classList.add('leaving');
-  outgoing.inert = true;
-  incoming.classList.add('entering');
-  incoming.inert = false;
-  updateNavigation();
-  if (hash) history.replaceState(null, '', `#world-${String(index + 1).padStart(2, '0')}`);
+  document.body.dataset.world = index;
+  document.querySelector('meta[name="theme-color"]').content = themes[index];
   retuneAudio();
   resetParticles();
   draw(0);
-  const transition = transitionFor(index);
-  const animation = incoming.animate(transition.keyframes, { duration: instant ? 1 : transition.duration, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'both' });
-  if (!motionPaused && !reducedMotion.matches && !instant) {
-    incoming.querySelectorAll('.scene-content h1>span,.scene-content h2>span').forEach((line, i) => {
-      line.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 1150, delay: 260 + i * 95, easing: 'cubic-bezier(.22,1,.36,1)' });
-    });
-  }
-  try { await animation.finished; } catch { /* A cancelled animation still settles to a complete world. */ }
-  outgoing.classList.remove('leaving');
-  incoming.classList.remove('entering');
-  incoming.classList.add('current');
-  animation.cancel();
-  document.querySelector('#announcement').textContent = `${String(current + 1).padStart(2, '0')} of 05. ${names[current]}.`;
-  busy = false;
-  if (queued) { const next = queued; queued = null; travel(next.index, next); }
-}
-
-function setDrifting(value) {
-  drifting = value;
-  clearInterval(driftTimer);
-  document.body.classList.toggle('drifting', value);
-  document.querySelectorAll('.drift-label').forEach(label => { label.textContent = value ? 'Pause drifting' : 'Begin drifting'; });
-  document.querySelectorAll('[data-drift]').forEach(button => button.setAttribute('aria-pressed', String(value)));
-  document.documentElement.style.setProperty('--drift', value ? '0' : '.18');
-  if (value) {
-    driftStarted = performance.now();
-    driftTimer = setInterval(() => {
-      if (!document.hidden && !dialogs.some(d => d.open) && !busy) {
-        driftStarted = performance.now();
-        travel(current + 1, { manual: false });
-      }
-    }, duration);
-  }
 }
 
 function setMotion(paused) {
@@ -131,7 +37,6 @@ function setMotion(paused) {
   button.setAttribute('aria-label', paused ? 'Resume motion' : 'Pause motion');
   button.title = paused ? 'Resume motion' : 'Pause motion';
   if (paused) {
-    setDrifting(false);
     cancelAnimationFrame(frame);
     camera = { x: 0, y: 0 };
     document.documentElement.style.setProperty('--px', '0');
@@ -140,62 +45,19 @@ function setMotion(paused) {
     draw(0);
   } else startFrames();
 }
-
-document.querySelectorAll('[data-select]').forEach(button => button.addEventListener('click', () => {
-  const index = Number(button.dataset.select);
-  dialogs.forEach(dialog => { if (dialog.open) dialog.close(); });
-  travel(index);
-}));
-document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click', () => travel(current + Number(button.dataset.step))));
-document.querySelectorAll('[data-drift]').forEach(button => button.addEventListener('click', () => setDrifting(!drifting)));
-document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => {
-  setDrifting(false);
-  document.querySelector(`#${button.dataset.open}`).showModal();
-}));
-document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
-dialogs.forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog && dialog.id === 'notes') dialog.close(); }));
 document.querySelector('#motion').addEventListener('click', () => setMotion(!motionPaused));
 reducedMotion.addEventListener('change', () => setMotion(reducedMotion.matches));
-document.querySelector('.wordmark').addEventListener('click', event => { event.preventDefault(); travel(0); });
-
-document.addEventListener('keydown', event => {
-  if (dialogs.some(d => d.open) || event.altKey || event.ctrlKey || event.metaKey || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
-  if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
-    event.preventDefault();
-    if (event.key === 'Home') travel(0);
-    else if (event.key === 'End') travel(4);
-    else travel(current + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1));
-  }
-});
-document.querySelector('#experience').addEventListener('wheel', event => {
-  if (event.ctrlKey || dialogs.some(d => d.open)) return;
-  event.preventDefault();
-  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-  const now = performance.now();
-  if (Math.abs(delta) > 22 && now - lastWheel > 1900 && !busy) {
-    lastWheel = now;
-    travel(current + Math.sign(delta));
-  }
-}, { passive: false });
-let touchStart;
-stage.addEventListener('pointerdown', event => { if (event.pointerType === 'touch') touchStart = { x: event.clientX, y: event.clientY }; });
-stage.addEventListener('pointerup', event => {
-  if (!touchStart || event.pointerType !== 'touch') return;
-  const dx = event.clientX - touchStart.x;
-  const dy = event.clientY - touchStart.y;
-  touchStart = null;
-  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.3 && !busy) travel(current + (dx < 0 ? 1 : -1));
-});
-stage.addEventListener('pointercancel', () => { touchStart = null; });
+document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => {
+  dialogs.forEach(dialog => { if (dialog.open) dialog.close(); });
+  document.querySelector('#' + button.dataset.open).showModal();
+}));
+document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+dialogs.forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); }));
 stage.addEventListener('pointermove', event => {
   if (event.pointerType !== 'mouse' || motionPaused) return;
   pointer = { x: (event.clientX / innerWidth - .5) * 2, y: (event.clientY / stage.clientHeight - .5) * 2 };
 });
 stage.addEventListener('pointerleave', () => { pointer = { x: 0, y: 0 }; });
-window.addEventListener('hashchange', () => {
-  const id = Number(location.hash.match(/^#world-0([1-5])$/)?.[1]);
-  if (id) travel(id - 1, { hash: false });
-});
 
 // Atmosphere is a light canvas layer, with a different behavior in every world.
 function resetParticles() {
@@ -342,10 +204,11 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-updateNavigation();
+
 setMotion(motionPaused);
 resize();
-const initial = Number(location.hash.match(/^#world-0([1-5])$/)?.[1]);
-if (initial && initial !== 1) travel(initial - 1, { instant: true, hash: false });
-// Warm all five images without delaying the opening view.
 worlds.forEach(world => world.querySelector('.artwork').decode().catch(() => {}));
+initObservatory({ travel, paused: () => motionPaused, reduced: () => reducedMotion.matches, current: () => current }).catch(error => {
+  console.error('Observatory:', error);
+  document.querySelector('#map-status').textContent = 'The observatory could not open. Please reload.';
+});

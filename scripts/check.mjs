@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..');
-const files = ['app.js', 'scripts/build.mjs', 'scripts/dev.mjs'];
+const files = ['app.js', 'observatory.js', 'scripts/build-engine.mjs', 'scripts/build.mjs', 'scripts/dev.mjs'];
 for (const file of files) {
   const check = spawnSync(process.execPath, ['--check', resolve(root, file)], { encoding: 'utf8' });
   if (check.status !== 0) throw new Error(check.stderr);
@@ -16,6 +16,7 @@ const assets = new Set([
 ].filter(file => !file.includes(':')));
 for (const asset of assets) await access(resolve(root, asset));
 for (const license of ['fonts/Bodoni-OFL.txt', 'fonts/Fragment-OFL.txt']) await access(resolve(root, license));
+for (const asset of ['vendor/universe.wasm', 'vendor/three.module.js', 'vendor/three.core.js', 'vendor/wasm_exec.js']) await access(resolve(root, asset));
 const manifest = JSON.parse(await readFile(resolve(root, '.openai/hosting.json'), 'utf8'));
 if (manifest.static?.directory !== 'dist') throw new Error('Hosting must serve the built dist directory.');
 if ((html.match(/class="world(?: current)?"/g) || []).length !== 5) throw new Error('The atlas must have five worlds.');
