@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c5d3c8">
+  <meta name="description" content="An atlas of impossible places. Wander through five illustrated worlds, somewhere beyond the known.">
+  <meta property="og:title" content="OTHERWHERE — An atlas of impossible places">
+  <meta property="og:description" content="Five worlds. No destination. A cinematic journey beyond the known.">
+  <meta property="og:type" content="website">
+  <title>OTHERWHERE — An atlas of impossible places</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/bodoni-moda.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="fonts/fragment-mono.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="img/70fab4545b453dc9a3492176d1aef096.jpg" as="image">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" type="module"></script>
+</head>
+<body data-world="0">
+  <a class="skip-link" href="#chapters">Skip to the atlas</a>
+  <div class="experience" id="experience">
+    <header class="masthead">
+      <a class="wordmark" href="#world-01" aria-label="Otherwhere, return to the Pale Frontier">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="12"/><ellipse cx="24" cy="24" rx="22" ry="7" transform="rotate(-40 24 24)"/><circle class="brand-star" cx="39" cy="10" r="2"/></svg>
+        <span>OTHERWHERE<span class="wordmark-dot">®</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-link" data-open="atlas">The atlas <span class="nav-count">(05)</span></button>
+        <button class="nav-link notes-link" data-open="notes">Field notes</button>
+      </nav>
+      <div class="experience-controls">
+        <button class="sound-button" id="sound" aria-label="Enable ambient sound" aria-pressed="false">
+          <span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span id="sound-label">Sound off</span>
+        </button>
+        <button class="motion-button" id="motion" aria-label="Pause motion" aria-pressed="false" title="Pause motion"><svg viewBox="0 0 20 20" aria-hidden="true"><path class="pause-icon" d="M7 5v10M13 5v10"/><path class="play-icon" d="m7 4 9 6-9 6Z"/></svg></button>
+      </div>
+    </header>
+
+    <main class="stage" id="stage" aria-label="Five illustrated worlds">
+      <section class="world current" id="world-01" data-id="0" aria-labelledby="title-01">
+        <div class="landscape"><img class="artwork" src="img/70fab4545b453dc9a3492176d1aef096.jpg" width="1170" height="595" alt="A lone traveler beside a fallen spacecraft, beneath a pale planet and a sky of constellations." fetchpriority="high"></div>
+        <div class="scene-shade"></div>
+        <div class="orbital-chart" aria-hidden="true"><svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice"><ellipse cx="940" cy="280" rx="470" ry="170" transform="rotate(-25 940 280)"/><ellipse cx="940" cy="280" rx="510" ry="195" transform="rotate(-25 940 280)"/><path d="M940 32v36m0 425v36M677 280h30m474 0h30"/><circle cx="1261" cy="110" r="4"/></svg></div>
+        <div class="scene-content">
+          <p class="eyebrow"><span class="tiny-star">✳</span> An atlas of impossible places</p>
+          <h1 id="title-01"><span>The quiet</span><span><em>beyond.</em></span></h1>
+          <p class="scene-line">For the part of you that never stopped wandering.</p>
+          <button class="drift-button" data-drift><span class="round-arrow" aria-hidden="true">↗</span><span class="drift-label">Begin drifting</span></button>
+        </div>
+        <div class="coordinates" aria-hidden="true"><span>SECTOR 001</span><span>48° 22′ N &nbsp; 04° 09′ E</span><div class="coordinate-cross"></div></div>
+        <div class="world-note"><span class="note-number">01</span><span>The Pale Frontier</span></div>
+      </section>
+
+      <section class="world" id="world-02" data-id="1" aria-labelledby="title-02" inert>
+        <div class="landscape"><img class="artwork" src="img/m1000x1000.jpg" width="1000" height="1000" alt="An explorer in dark windswept grass, beneath coral clouds and a colossal ringed sun."></div>
+        <div class="scene-shade"></div>
+        <div class="orbital-chart" aria-hidden="true"><svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice"><ellipse cx="900" cy="320" rx="680" ry="140" transform="rotate(23 900 320)"/><ellipse cx="900" cy="320" rx="680" ry="157" transform="rotate(23 900 320)"/><circle cx="1250" cy="460" r="5"/></svg></div>
+        <div class="scene-content">
+          <p class="eyebrow"><span class="tiny-star">✳</span> An atlas of impossible places</p>
+          <h2 id="title-02"><span>A sun</span><span>that <em>sleeps.</em></span></h2>
+          <p class="scene-line">Stay a little. The light is different here.</p>
+          <button class="drift-button" data-drift><span class="round-arrow" aria-hidden="true">↗</span><span class="drift-label">Begin drifting</span></button>
+        </div>
+        <div class="coordinates" aria-hidden="true"><span>SECTOR 002</span><span>17° 03′ N &nbsp; 62° 44′ E</span><div class="coordinate-cross"></div></div>
+        <div class="world-note"><span class="note-number">02</span><span>The Sleeping Sun</span></div>
+      </section>
+
+      <section class="world" id="world-03" data-id="2" aria-labelledby="title-03" inert>
+        <div class="landscape"><img class="artwork" src="img/7248066809.jpg" width="2560" height="2560" alt="A tiny traveler on a weathered ship watches an immense blue moon rising over a golden field."></div>
+        <div class="scene-shade"></div>
+        <div class="orbital-chart" aria-hidden="true"><svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice"><circle cx="980" cy="350" r="340"/><circle cx="980" cy="350" r="355"/><path d="M610 350h40m660 0h40M980 0v30m0 640v40"/></svg></div>
+        <div class="scene-content">
+          <p class="eyebrow"><span class="tiny-star">✳</span> An atlas of impossible places</p>
+          <h2 id="title-03"><span>The last</span><span><em>light.</em></span></h2>
+          <p class="scene-line">An ocean of sky. A shore of your own.</p>
+          <button class="drift-button" data-drift><span class="round-arrow" aria-hidden="true">↗</span><span class="drift-label">Begin drifting</span></button>
+        </div>
+        <div class="coordinates" aria-hidden="true"><span>SECTOR 003</span><span>09° 51′ S &nbsp; 33° 18′ E</span><div class="coordinate-cross"></div></div>
+        <div class="world-note"><span class="note-number">03</span><span>The Lunar Shore</span></div>
+      </section>
+
+      <section class="world" id="world-04" data-id="3" aria-labelledby="title-04" inert>
+        <div class="landscape"><img class="artwork" src="img/90926a3b4548b0eeee9af005be0dbf80.jpg" width="673" height="1200" alt="An illustrated warrior with a vermilion helmet crest stands resolute beneath a rain of arrows."></div>
+        <div class="scene-shade"></div>
+        <div class="orbital-chart" aria-hidden="true"><svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice"><circle cx="1060" cy="490" r="370"/><path d="M550 780 1210 20M575 790 1235 30M1060 100v40m0 700v40"/></svg></div>
+        <div class="scene-content">
+          <p class="eyebrow"><span class="tiny-star">✳</span> An atlas of impossible places</p>
+          <h2 id="title-04"><span>A fire</span><span><em>within.</em></span></h2>
+          <p class="scene-line">Some worlds are found. Others are forged.</p>
+          <button class="drift-button" data-drift><span class="round-arrow" aria-hidden="true">↗</span><span class="drift-label">Begin drifting</span></button>
+        </div>
+        <div class="coordinates" aria-hidden="true"><span>SECTOR 004</span><span>36° 12′ N &nbsp; 22° 47′ E</span><div class="coordinate-cross"></div></div>
+        <div class="world-note"><span class="note-number">04</span><span>The Crimson Oath</span></div>
+      </section>
+
+      <section class="world" id="world-05" data-id="4" aria-labelledby="title-05" inert>
+        <div class="landscape"><img class="artwork" src="img/eastshade_night.jpg" width="1920" height="1080" alt="A blue planet above a still nighttime landscape, with a distant windmill, mountains and a stone bridge."></div>
+        <div class="scene-shade"></div>
+        <div class="orbital-chart" aria-hidden="true"><svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice"><circle cx="350" cy="280" r="210"/><circle cx="350" cy="280" r="229"/><path d="M80 280h35m470 0h35M350 15v30m0 470v30"/><circle cx="510" cy="116" r="4"/></svg></div>
+        <div class="scene-content">
+          <p class="eyebrow"><span class="tiny-star">✳</span> An atlas of impossible places</p>
+          <h2 id="title-05"><span>Where</span><span><em>silence</em> lives.</span></h2>
+          <p class="scene-line">Even the stars seem to hold their breath.</p>
+          <button class="drift-button" data-drift><span class="round-arrow" aria-hidden="true">↗</span><span class="drift-label">Begin drifting</span></button>
+        </div>
+        <div class="coordinates" aria-hidden="true"><span>SECTOR 005</span><span>58° 06′ N &nbsp; 11° 32′ W</span><div class="coordinate-cross"></div></div>
+        <div class="world-note"><span class="note-number">05</span><span>The Blue Hour</span></div>
+      </section>
+
+      <div class="atmosphere" aria-hidden="true"><div class="haze haze-one"></div><div class="haze haze-two"></div></div>
+      <canvas id="particles" aria-hidden="true"></canvas>
+      <div class="grain" aria-hidden="true"></div>
+      <div class="scene-navigation">
+        <span class="travel-hint"><span class="hint-line"></span><span class="desktop-hint">Scroll to wander</span><span class="mobile-hint">Swipe to wander</span></span>
+        <div class="scene-arrows"><button class="arrow-button" data-step="-1" aria-label="Previous world">←</button><span class="chapter-count"><span id="current-number">01</span><span class="count-divider">/</span>05</span><button class="arrow-button" data-step="1" aria-label="Next world">→</button></div>
+      </div>
+      <p class="sr-only" id="announcement" aria-live="polite" aria-atomic="true"></p>
+    </main>
+
+    <footer class="atlas-rail" id="chapters" tabindex="-1">
+      <div class="rail-label"><span class="rail-star">✳</span><span>Five worlds.<br>No destination.</span></div>
+      <nav class="chapter-list" aria-label="Choose a world">
+        <button class="chapter selected" data-select="0" aria-current="true"><span class="chapter-image"><img src="img/70fab4545b453dc9a3492176d1aef096.jpg" alt="" width="1170" height="595"></span><span class="chapter-text"><span class="chapter-number">01 <span class="chapter-status">Now wandering</span></span><span class="chapter-name">Pale Frontier</span></span><span class="chapter-progress"></span></button>
+        <button class="chapter" data-select="1"><span class="chapter-image"><img src="img/m1000x1000.jpg" alt="" width="1000" height="1000"></span><span class="chapter-text"><span class="chapter-number">02 <span class="chapter-status">Now wandering</span></span><span class="chapter-name">Sleeping Sun</span></span><span class="chapter-progress"></span></button>
+        <button class="chapter" data-select="2"><span class="chapter-image lunar-thumbnail"><img src="img/7248066809.jpg" alt="" width="2560" height="2560"></span><span class="chapter-text"><span class="chapter-number">03 <span class="chapter-status">Now wandering</span></span><span class="chapter-name">Lunar Shore</span></span><span class="chapter-progress"></span></button>
+        <button class="chapter" data-select="3"><span class="chapter-image"><img src="img/90926a3b4548b0eeee9af005be0dbf80.jpg" alt="" width="673" height="1200"></span><span class="chapter-text"><span class="chapter-number">04 <span class="chapter-status">Now wandering</span></span><span class="chapter-name">Crimson Oath</span></span><span class="chapter-progress"></span></button>
+        <button class="chapter" data-select="4"><span class="chapter-image"><img src="img/eastshade_night.jpg" alt="" width="1920" height="1080"></span><span class="chapter-text"><span class="chapter-number">05 <span class="chapter-status">Now wandering</span></span><span class="chapter-name">Blue Hour</span></span><span class="chapter-progress"></span></button>
+      </nav>
+      <button class="atlas-grid-button" data-open="atlas" aria-label="Open the full atlas"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><rect x="15" y="15" width="6" height="6"/></svg></button>
+    </footer>
+  </div>
+
+  <dialog class="atlas-dialog" id="atlas" aria-labelledby="atlas-title">
+    <div class="dialog-top"><span class="dialog-brand">OTHERWHERE / THE ATLAS</span><button class="close-button" data-close aria-label="Close atlas"><span>Close</span> ×</button></div>
+    <div class="atlas-heading"><h2 id="atlas-title">Choose your <em>elsewhere.</em></h2><span class="atlas-total">01 — 05</span></div>
+    <div class="atlas-grid">
+      <button class="atlas-card" data-select="0"><span class="card-photo"><img src="img/70fab4545b453dc9a3492176d1aef096.jpg" alt="A traveler beneath a pale planet"><span class="card-visit">Currently here</span><span class="card-arrow">↗</span></span><span class="card-number">01 / WIND & RUIN</span><span class="card-name">Pale Frontier</span></button>
+      <button class="atlas-card" data-select="1"><span class="card-photo"><img src="img/m1000x1000.jpg" alt="An explorer beneath a ringed sun"><span class="card-visit"></span><span class="card-arrow">↗</span></span><span class="card-number">02 / DUST & GOLD</span><span class="card-name">Sleeping Sun</span></button>
+      <button class="atlas-card" data-select="2"><span class="card-photo lunar-thumbnail"><img src="img/7248066809.jpg" alt="A traveler watching an enormous moon"><span class="card-visit"></span><span class="card-arrow">↗</span></span><span class="card-number">03 / TIDE & SKY</span><span class="card-name">Lunar Shore</span></button>
+      <button class="atlas-card" data-select="3"><span class="card-photo"><img src="img/90926a3b4548b0eeee9af005be0dbf80.jpg" alt="A warrior with a red helmet crest"><span class="card-visit"></span><span class="card-arrow">↗</span></span><span class="card-number">04 / ASH & HONOR</span><span class="card-name">Crimson Oath</span></button>
+      <button class="atlas-card" data-select="4"><span class="card-photo"><img src="img/eastshade_night.jpg" alt="A blue planet over a nighttime landscape"><span class="card-visit"></span><span class="card-arrow">↗</span></span><span class="card-number">05 / STILL & STARRY</span><span class="card-name">Blue Hour</span></button>
+    </div>
+    <div class="atlas-bottom"><span>A journey without a destination.</span><span>Follow what feels like wonder. ↗</span></div>
+  </dialog>
+
+  <dialog class="notes-dialog" id="notes" aria-labelledby="notes-title">
+    <div class="dialog-top"><span class="dialog-brand">OTHERWHERE / FIELD NOTES</span><button class="close-button" data-close aria-label="Close field notes"><span>Close</span> ×</button></div>
+    <span class="notes-symbol" aria-hidden="true">✳</span>
+    <h2 id="notes-title">A little further<br>from <em>ordinary.</em></h2>
+    <p>Five landscapes, somewhere between a memory and a dream. An invitation to slow down, look closer, and get a little lost.</p>
+    <div class="notes-colophon"><span>AN IMAGINARY FIELD ATLAS</span><p>Inspired by the supplied artwork. Original artist markings are preserved in the source images. Crimson Oath artwork marked @Pixel_PulseAI; Blue Hour reference: Eastshade.</p><span>BODONI MODA × FRAGMENT MONO</span></div>
+  </dialog>
+  <noscript><div class="noscript-note">Enable JavaScript to travel between worlds. The Pale Frontier is still yours to enjoy.</div></noscript>
+</body>
+</html>
