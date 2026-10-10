@@ -20,3 +20,9 @@ dialog{color:var(--cream);background:#102c2a;border:1px solid #e8e6d133;padding:
 .instrument input::-moz-range-track{height:2px;background:#e8e6d166}
 .instrument input::-moz-range-thumb{width:12px;height:12px;border:1px solid #e8e6d1;border-radius:50%;background:#173833}
 .flat-observatory .planet-label:before{content:'';position:absolute;left:-30px;top:12px;width:18px;height:18px;border:1px solid #e8e6d166;border-radius:50%;background:radial-gradient(circle at 30% 30%,#aabfa1,#1d3933)}
+.compact-map .map-intro{top:12.5%;left:7%;max-width:400px}
+.compact-map .map-intro .eyebrow{margin-bottom:15px}
+.compact-map .map-intro h1{font-size:clamp(40px,13.3vw,70px);white-space:nowrap;line-height:.95}
+.compact-map .map-intro h1 br{display:none}.compact-map .map-intro h1 em{display:block}
+.compact-map .map-invitation,.compact-map .intro-rule{display:none}
+@media(max-width:360px){.planet-name{font-size:17px}.planet-label{padding-left:9px;padding-right:8px;gap:3px}.planet-number{font-size:5px}.instrument h3{font-size:21px}.instrument-body{gap:10px}.tuning-dial{width:65px;flex-basis:65px}}

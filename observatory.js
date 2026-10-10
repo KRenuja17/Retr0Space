@@ -36,7 +36,7 @@ export async function initObservatory(api){
  let discoveries=[];
  try{discoveries=validDiscoveries(JSON.parse(localStorage.getItem(storageKey)||'[]'));}catch{}
  let mode='map',selected=-1,signal=0,hold=0,toastTimer,flight;
- let simulationTime=0,lastTime=0,lastRender=0,flash=0,compact=innerWidth<=600;
+ let simulationTime=0,lastTime=0,lastRender=0,flash=0,compact=innerWidth<=600||innerWidth/innerHeight<.86,mapHover=false;
  const labels=[],planets=[],meshes=[],probes=[];
  const canvas=$('#universe-canvas'),scene=new THREE.Scene(),system=new THREE.Group(),starGroup=new THREE.Group(),probeGroup=new THREE.Group();
  scene.add(system,starGroup,probeGroup);probeGroup.visible=false;
@@ -57,6 +57,9 @@ export async function initObservatory(api){
   ring.rotation.set(i*.55+.45,i*.7,i*.8);armillary.add(ring);
  }
  armillary.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.14),new THREE.MeshBasicMaterial({color:0xd8dcc1})));system.add(armillary);
+ const routeGeometry=new THREE.BufferGeometry(),route=new THREE.Line(routeGeometry,new THREE.LineBasicMaterial({color:0xe4d1a9,transparent:true,opacity:.24}));
+ routeGeometry.setAttribute('position',new THREE.BufferAttribute(new Float32Array(45),3));routeGeometry.setDrawRange(0,0);
+ const routeStars=new THREE.Points(routeGeometry,new THREE.PointsMaterial({color:0xf2e7c5,size:.065,transparent:true,opacity:.8}));system.add(route,routeStars);
  worlds.forEach((name,i)=>{
   const group=new THREE.Group(),radius=[.73,.72,.89,.65,.72][i];
   const material=new THREE.ShaderMaterial({vertexShader,fragmentShader:planetShader,uniforms:{highColor:{value:new THREE.Color(palette[i][0])},lowColor:{value:new THREE.Color(palette[i][1])},darkColor:{value:new THREE.Color(palette[i][2])},kind:{value:i}}});
@@ -73,7 +76,7 @@ export async function initObservatory(api){
   const orbit=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0xa1b6a1,transparent:true,opacity:.105}));orbit.userData.orbit=true;system.add(orbit);
   const button=document.createElement('button');button.className='planet-label';button.dataset.planet=i;button.setAttribute('aria-label','Land on '+name);
   button.innerHTML='<span class="planet-number">'+pad(i+1)+' / UNCHARTED</span><span class="planet-name">'+name+'</span><span class="planet-progress" aria-hidden="true"><i></i><i></i><i></i></span>';
-  button.addEventListener('click',()=>land(i));$('#planet-labels').append(button);labels.push(button);
+  button.addEventListener('click',()=>land(i));button.addEventListener('pointerenter',()=>{mapHover=true;});button.addEventListener('pointerleave',()=>{mapHover=false;});$('#planet-labels').append(button);labels.push(button);
  });
  for(let i=0;i<3;i++){
   const group=new THREE.Group(),crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.105),new THREE.MeshStandardMaterial({color:0xe0dbc2,metalness:.55,roughness:.18,emissive:0xa2c0a7,emissiveIntensity:.5}));
@@ -112,7 +115,7 @@ export async function initObservatory(api){
   $('#export-poster').disabled=!discoveries.length;
  }
  function resize(){
-  compact=innerWidth<=600;camera.aspect=innerWidth/innerHeight;camera.fov=compact?48:44;camera.updateProjectionMatrix();
+  compact=innerWidth<=600||innerWidth/innerHeight<.86;document.body.classList.toggle('compact-map',compact);camera.aspect=innerWidth/innerHeight;camera.fov=compact?48:44;camera.updateProjectionMatrix();
   defaultCamera.set(0,compact?-.7:.15,compact?25:18);focus.set(0,compact?-.7:0,0);
   if(mode!=='flight')camera.position.copy(defaultCamera).multiplyScalar(view.zoom);
   system.position.x=compact?0:2.05;system.children.filter(child=>child.userData.orbit).forEach(child=>child.visible=!compact);armillary.visible=!compact;
@@ -120,6 +123,8 @@ export async function initObservatory(api){
  }
  function updatePlanets(){
   JSON.parse(engine.frame(simulationTime,compact)).forEach((p,i)=>{planets[i].group.position.set(p.x,p.y,p.z);planets[i].sphere.rotation.y=p.spin;});
+  route.visible=routeStars.visible=discoveries.length>0;
+  if(discoveries.length){const position=routeGeometry.getAttribute('position');discoveries.forEach((id,i)=>{const planet=planets[Math.floor(id/3)],a=id%3*Math.PI*2/3,p=planet.group.position;position.setXYZ(i,p.x+Math.cos(a)*planet.radius*1.15,p.y+Math.sin(a)*planet.radius*1.15,p.z+planet.radius*.4);});position.needsUpdate=true;routeGeometry.setDrawRange(0,discoveries.length);routeGeometry.computeBoundingSphere();}
  }
  const projected=new THREE.Vector3();
  function positionLabels(){
@@ -208,7 +213,7 @@ export async function initObservatory(api){
   }catch(error){console.error(error);$('#journal-caption').textContent='The poster could not be saved. Please try again.';}finally{button.disabled=!discoveries.length;}
  });
  const raycaster=new THREE.Raycaster();let drag;
- canvas.addEventListener('pointerdown',event=>{if(mode!=='map')return;drag={x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false};canvas.setPointerCapture(event.pointerId);});
+ canvas.addEventListener('pointerdown',event=>{if(mode!=='map')return;if(labels.includes(document.activeElement))document.activeElement.blur();drag={x:event.clientX,y:event.clientY,startX:event.clientX,startY:event.clientY,moved:false};canvas.setPointerCapture(event.pointerId);});
  canvas.addEventListener('pointermove',event=>{if(!drag||mode!=='map')return;const dx=event.clientX-drag.x,dy=event.clientY-drag.y;if(Math.hypot(event.clientX-drag.startX,event.clientY-drag.startY)>6)drag.moved=true;view.yaw=clamp(view.yaw+dx*.0025,-.45,.45);view.pitch=clamp(view.pitch+dy*.0015,-.2,.2);drag.x=event.clientX;drag.y=event.clientY;});
  canvas.addEventListener('pointerup',event=>{if(drag&&!drag.moved&&mode==='map'){raycaster.setFromCamera(new THREE.Vector2(event.clientX/innerWidth*2-1,-event.clientY/innerHeight*2+1),camera);const hit=raycaster.intersectObjects(meshes)[0];if(hit)land(hit.object.userData.world);}drag=null;});
  canvas.addEventListener('pointercancel',()=>{drag=null;});canvas.addEventListener('wheel',event=>{if(mode!=='map'||event.ctrlKey)return;event.preventDefault();view.zoom=clamp(view.zoom+event.deltaY*.0003,.83,1.25);},{passive:false});
@@ -217,7 +222,8 @@ export async function initObservatory(api){
  canvas.addEventListener('webglcontextrestored',()=>{$('#map-status').textContent='Drag to orbit · Choose a world to land';});
  function tick(now){
   requestAnimationFrame(tick);const dt=Math.min((now-lastTime)/1000||.016,.06);lastTime=now;if(document.hidden){hold=0;return;}
-  const modal=Boolean(document.querySelector('dialog[open]'));if(!api.paused()&&!modal&&mode==='map')simulationTime+=dt;
+  const modal=Boolean(document.querySelector('dialog[open]')),keyboardPlanet=labels.some(label=>label.matches(':focus-visible'));
+  if(!api.paused()&&!modal&&mode==='map'&&!mapHover&&!keyboardPlanet)simulationTime+=dt;
   if(selected>=0&&!discoveries.includes(selected)&&mode==='field'&&!modal){if(signal>.97){hold+=dt;$('.lock-orbit').style.strokeDashoffset=1-clamp(hold/1.15,0,1);if(hold>=1.15)record();}else hold=0;}
   if(now-lastRender<32)return;lastRender=now;
   if(mode==='map'){

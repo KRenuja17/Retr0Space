@@ -11,8 +11,6 @@ let motionPaused = reducedMotion.matches;
 let frame, previousFrame = 0, lastDraw = 0;
 let pointer = { x: 0, y: 0 }, camera = { x: 0, y: 0 };
 let width = 0, height = 0, particles = [];
-const drifting = false, driftStarted = 0, duration = 14000;
-const setDrifting = () => {};
 
 async function travel(index) {
   const incoming = worlds[index];
@@ -116,11 +114,10 @@ function tick(time) {
     camera.y += (pointer.y - camera.y) * .055;
     document.documentElement.style.setProperty('--px', camera.x.toFixed(3));
     document.documentElement.style.setProperty('--py', camera.y.toFixed(3));
-    const push = (Math.sin(time * .00007) + 1) * .0075 + (drifting ? Math.min((time - driftStarted) / duration, 1) * .02 : 0);
+    const push = (Math.sin(time * .00007) + 1) * .0075;
     document.documentElement.style.setProperty('--push', push.toFixed(4));
     draw(Math.min(time - lastDraw || dt, 60), time);
     lastDraw = time;
-    if (drifting) document.documentElement.style.setProperty('--drift', String(Math.min((time - driftStarted) / duration, 1)));
   }
   frame = requestAnimationFrame(tick);
 }
@@ -195,7 +192,6 @@ document.querySelector('#sound').addEventListener('click', async () => {
 });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    setDrifting(false);
     cancelAnimationFrame(frame);
     if (audio) audio.suspend();
   } else {

@@ -15,6 +15,7 @@ const note=text=>{checks.push(text);console.log(text);};
 const watch=page=>{
  page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error'&&!message.text().includes('Error creating WebGL context'))errors.push(message.text());});
+ page.on('console',message=>{if(message.type()==='warning'&&message.text().includes('Buffer size too small'))errors.push(message.text());});
  page.on('response',response=>{if(response.status()>=400)errors.push(response.status()+' '+response.url());});
 };
 async function open(page,hash=''){
@@ -22,6 +23,7 @@ async function open(page,hash=''){
  await page.evaluate(()=>document.fonts.ready);
 }
 async function land(page,world){
+ await page.locator('[data-planet="'+world+'"]').hover({force:true});
  await page.locator('[data-planet="'+world+'"]').click();
  await page.waitForSelector('body.exploring');await page.waitForTimeout(220);
  assert.equal(await page.locator('.world.current').getAttribute('data-id'),String(world));
