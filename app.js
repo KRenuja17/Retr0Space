@@ -136,6 +136,7 @@ function setMotion(paused) {
     camera = { x: 0, y: 0 };
     document.documentElement.style.setProperty('--px', '0');
     document.documentElement.style.setProperty('--py', '0');
+    document.documentElement.style.setProperty('--push', '0');
     draw(0);
   } else startFrames();
 }
@@ -166,7 +167,7 @@ document.addEventListener('keydown', event => {
     else travel(current + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : -1));
   }
 });
-stage.addEventListener('wheel', event => {
+document.querySelector('#experience').addEventListener('wheel', event => {
   if (event.ctrlKey || dialogs.some(d => d.open)) return;
   event.preventDefault();
   const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
@@ -253,6 +254,8 @@ function tick(time) {
     camera.y += (pointer.y - camera.y) * .055;
     document.documentElement.style.setProperty('--px', camera.x.toFixed(3));
     document.documentElement.style.setProperty('--py', camera.y.toFixed(3));
+    const push = (Math.sin(time * .00007) + 1) * .0075 + (drifting ? Math.min((time - driftStarted) / duration, 1) * .02 : 0);
+    document.documentElement.style.setProperty('--push', push.toFixed(4));
     draw(Math.min(time - lastDraw || dt, 60), time);
     lastDraw = time;
     if (drifting) document.documentElement.style.setProperty('--drift', String(Math.min((time - driftStarted) / duration, 1)));

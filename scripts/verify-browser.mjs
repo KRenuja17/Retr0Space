@@ -1,0 +1,112 @@
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+// Use an existing Playwright installation; it is not a site dependency.
+const playwright = process.env.PLAYWRIGHT_MODULE_PATH
+  ? await import(pathToFileURL(resolve(process.env.PLAYWRIGHT_MODULE_PATH, 'index.mjs')).href)
+  : await import('playwright');
+const out = resolve(import.meta.dirname, '../.artifacts');
+await mkdir(out, { recursive: true });
+const browser = await playwright.chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1 });
+const errors = [];
+page.on('pageerror', e => errors.push(e.message));
+page.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
+const url = process.env.PREVIEW_URL || 'http://localhost:4173';
+try {
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: resolve(out, '01-pale-frontier-desktop.png') });
+  console.log('Opening composition rendered.');
+  assert.equal(await page.locator('.world.current').getAttribute('data-id'), '0');
+  assert.equal(await page.locator('.chapter[aria-current=true]').count(), 1);
+  for (let i = 1; i < 5; i++) {
+    await page.getByRole('button', { name: 'Next world', exact: true }).click();
+    await page.waitForFunction(index => document.querySelector('.world.current')?.dataset.id === String(index), i);
+    await page.screenshot({ path: resolve(out, `0${i + 1}-world-desktop.png`) });
+    assert.equal(await page.locator('.world:not([inert])').count(), 1);
+  }
+  await page.keyboard.press('ArrowRight');
+  console.log('All five desktop worlds rendered.');
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '0');
+  await page.getByRole('button', { name: /^The atlas/ }).click();
+  await assert.equal(await page.locator('#atlas').evaluate(d => d.open), true);
+  await page.screenshot({ path: resolve(out, 'atlas-desktop.png') });
+  await page.locator('.atlas-card[data-select="3"]').click();
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '3');
+  assert.equal(await page.locator('#atlas').evaluate(d => d.open), false);
+  await page.getByRole('button', { name: 'Field notes', exact: true }).click();
+  assert.equal(await page.locator('#notes').evaluate(d => d.open), true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#notes').evaluate(d => d.open), false);
+  console.log('Atlas, chapter selection, field notes, and Escape passed.');
+  await page.getByRole('button', { name: 'Pause motion', exact: true }).click();
+  assert.equal(await page.locator('#motion').getAttribute('aria-pressed'), 'true');
+  await page.locator('.world:not([inert])').getByRole('button', { name: 'Begin drifting', exact: true }).click();
+  assert.equal(await page.locator('body').evaluate(b => b.classList.contains('drifting')), true);
+  await page.locator('.world:not([inert])').getByRole('button', { name: 'Pause drifting', exact: true }).click();
+  assert.equal(await page.locator('body').evaluate(b => b.classList.contains('drifting')), false);
+  await page.getByRole('button', { name: 'Enable ambient sound', exact: true }).click();
+  assert.equal(await page.locator('#sound').getAttribute('aria-pressed'), 'true');
+  await page.getByRole('button', { name: 'Mute ambient sound', exact: true }).click();
+  assert.equal(await page.locator('#sound').getAttribute('aria-pressed'), 'false');
+  console.log('Motion pause, drifting, and opt-in sound passed.');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '0');
+  assert.equal(await page.locator('#motion').getAttribute('aria-pressed'), 'true');
+  await page.mouse.wheel(0, 120);
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '1');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '0');
+  await page.evaluate(() => document.activeElement?.blur());
+  await page.screenshot({ path: resolve(out, '01-pale-frontier-mobile.png') });
+  for (let i = 1; i < 5; i++) {
+    await page.getByRole('button', { name: 'Next world', exact: true }).click();
+    await page.waitForFunction(index => document.querySelector('.world.current')?.dataset.id === String(index), i);
+    await page.screenshot({ path: resolve(out, `0${i + 1}-world-mobile.png`) });
+  }
+  await page.getByRole('button', { name: /^The atlas/ }).click();
+  await page.screenshot({ path: resolve(out, 'atlas-mobile.png'), fullPage: true });
+  console.log('All five mobile worlds and the mobile atlas rendered.');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.locator('.atlas-card[data-select="4"]').scrollIntoViewIfNeeded();
+  assert.equal(await page.locator('.atlas-card[data-select="4"]').isVisible(), true);
+  await page.locator('#atlas').getByRole('button', { name: 'Field notes ↗', exact: true }).click();
+  assert.equal(await page.locator('#notes').evaluate(d => d.open), true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#atlas').evaluate(d => d.open), true);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '0');
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 300, y: 580 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 80, y: 580 }] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '1');
+  assert.equal(await page.locator('.world:not([inert])').count(), 1);
+  await page.locator('.world:not([inert])').getByRole('button', { name: 'Begin drifting', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '2', null, { timeout: 18000 });
+  await page.locator('.world:not([inert])').getByRole('button', { name: 'Pause drifting', exact: true }).click();
+  console.log('Touch swipe and the full timed drift cycle passed.');
+  await page.keyboard.press('End');
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '4');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForFunction(() => document.querySelector('.world.current')?.dataset.id === '4');
+  assert.equal(await page.locator('#motion').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('#sound').getAttribute('aria-pressed'), 'false');
+  assert.deepEqual(errors, []);
+  await page.setViewportSize({ width: 844, height: 390 });
+  const driftBox = await page.locator('.world:not([inert]) [data-drift]').boundingBox();
+  const railBox = await page.locator('.atlas-rail').boundingBox();
+  assert.ok(driftBox.y + driftBox.height <= railBox.y, 'The drift control must fit in landscape mode.');
+  assert.ok(railBox.y + railBox.height <= 390, 'The chapter rail must fit in landscape mode.');
+  await page.screenshot({ path: resolve(out, '05-world-landscape.png') });
+  const report = { result: 'passed', worlds: 5, desktop: '1440×960', mobile: '390×844', checks: ['images and fonts', 'all world transitions', 'chapter selection', 'keyboard and wheel across the viewport', 'touch swipe', 'atlas with all five cards reachable on mobile', 'field notes and Escape', 'motion pause', 'full timed drift cycle', 'opt-in audio', 'reduced motion', 'deep-link reload', 'no horizontal overflow', 'no runtime or HTTP errors'] };
+  await writeFile(resolve(out, 'verification.json'), JSON.stringify(report, null, 2));
+  console.log(JSON.stringify(report));
+} finally { await browser.close(); }

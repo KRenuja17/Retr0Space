@@ -2,7 +2,7 @@
 
 A cinematic, browser-based atlas inspired by the five supplied images in `img/`. Each world has its own palette, atmosphere, typography composition, transition, and optional synthesized soundscape.
 
-Requires Node.js 20 or later. There are no runtime dependencies.
+Requires Node.js 20.11 or later. There are no runtime dependencies.
 
 ```sh
 npm run dev

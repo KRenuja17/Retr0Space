@@ -9,5 +9,5 @@
     "build": "node scripts/build.mjs",
     "check": "node scripts/check.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20.11.0" }
 }
