@@ -77,7 +77,7 @@ try{
   for(let echo=0;echo<3;echo++)await discover(page,world*3+echo);
   assert.match(await page.locator('#field-count').textContent(),/^3 \/ 3/);
   await page.screenshot({path:resolve(out,'charted-world-'+world+'.png')});
-  await page.locator('.back-map').click();await page.waitForSelector('body.in-observatory');
+  await page.locator('#field-ui .back-map').click();await page.waitForSelector('body.in-observatory');
   note(worldsLabel(world)+' fully discovered through frequency search.');
  }
  assert.equal(await page.locator('#journal-count').textContent(),'15 / 15');

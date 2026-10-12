@@ -16,3 +16,9 @@ Verified in headless Chromium with WebGL enabled, using the installed Playwright
 Go tests cover deterministic and bounded star generation, finite orbital frames, achievable signal locks, invalid signal IDs, and valid poster XML with duplicate/invalid discoveries rejected. JavaScript syntax, local assets, and the static deployment build also pass.
 
 Run `npm run build:engine`, `npm run check`, `npm run build`, and `node scripts/verify-browser.mjs` to reproduce the checks. The browser suite requires a running preview server and an existing Playwright installation; see README.md.
+
+## Voxel sanctuary
+
+The additional `node scripts/verify-sanctuary.mjs` suite verifies the actual rendered diorama, including image comparisons that prove it animates, freezes under motion pause, and responds to drag and zoom. It covers all three landmark close-ups, both lighting states, the journal, Escape navigation, keyboard re-entry, and recording an original-world echo after leaving the sanctuary.
+
+Controls fit at 1440×900, 390×844, 320×667, 768×1024, and 1366×600. Reduced-motion controls and the WebGL-unavailable status also pass. Rendered desktop, portrait, day/night, and close-up images were inspected visually. The terrain tests reject duplicate cells, bound allocation, check repeatable output, and verify interior cells are excluded.

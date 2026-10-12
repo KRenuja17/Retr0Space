@@ -20,6 +20,14 @@ Each world has three echoes. The Go resonance curve controls the instrument's st
 
 Continuous motion pauses when a native dialog opens, when the page is hidden, when requested by the visitor, or under reduced-motion preferences. Signal tuning remains playable with motion paused. The HTML buttons, native range, and dialogs preserve keyboard access.
 
+## The Drifting Observatory
+
+The user's sample clip supplied the idea of a densely detailed floating voxel miniature. This scene translates that scale and craft into OTHERWHERE's sage, bronze, ivory, and nocturnal teal. Its tower, telescope, stranded ship, lone wanderer, windmill, bridge, and falling water connect directly to the original illustrations.
+
+The model is built from actual box geometry. Go produces only the terrain's visible surface cells. The architectural details and plants are hand-authored procedural geometry, batched with instancing. Soft directional shadows, warm window emissions, a cool rim light, drifting translucent voxel clouds, and a block-built moon give the scene depth without downloaded art assets.
+
+The opening camera makes a slow settling orbit. Close-up controls frame the telescope, landing site, and waterfall. Day/night lighting blends smoothly, with text colors following the sky. Portrait framing fits the whole island; close-ups intentionally reveal its smaller details. Motion pause stops the water, mill, telescope, clouds, and camera motion. Keyboard and native controls remain usable.
+
 ## Sources and licenses
 
 - The supplied artwork is the primary visual reference; no additional artwork is downloaded.

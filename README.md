@@ -16,6 +16,14 @@ Open http://localhost:4173. Drag the universe to orbit, scroll to change your di
 
 The planet buttons and frequency range work with the keyboard. Escape closes the instrument, then returns to orbit. Sound is opt-in; the motion control and system reduced-motion preference stop continuous animation and skip camera flights. A native planet list remains available if WebGL cannot initialize.
 
+## The voxel sanctuary
+
+Choose **Sanctuary** in the navigation, or open `/#sanctuary`. The Drifting Observatory is an original floating voxel island with an astronomical tower, a scanning brass telescope, a windmill, a stranded spacecraft and wanderer, a bridge to a smaller island, pale trees, and a luminous waterfall.
+
+Drag or use arrow keys to orbit. Scroll to change distance. The three landmark buttons move into close-ups; the reset control returns to the whole island. **Daybreak / Nightfall** changes the sky and lighting. Motion pause freezes the rendered miniature, and reduced motion uses immediate camera and sky changes. The journal remains available, and Escape returns to the star map.
+
+Go generates a deterministic terrain surface with interior cells omitted. JavaScript authors the landmarks, and Three.js renders batches of instanced voxel geometry with real lights and shadows. The reference clip is used for inspiration only; it is not shipped or embedded.
+
 ## The Go engine
 
 Go is used for real runtime work, not a placeholder server. Source lives in engine/. It compiles to vendor/universe.wasm and runs inside the browser:
@@ -23,6 +31,7 @@ Go is used for real runtime work, not a placeholder server. Source lives in engi
 - Deterministic three-dimensional star catalog and planetary orbital frames.
 - Signal resonance used by every frequency adjustment.
 - Constellation geometry and SVG poster generation from discovery order.
+- Bounded, deterministic exposed voxel terrain for the sanctuary and its smaller island.
 
 Three.js 0.186.1 renders the WebGL geometry, raycasting, procedural surface shaders, camera flights, crystalline probes, and the five spatial resonance formations. JavaScript connects the DOM controls to those systems.
 
@@ -38,6 +47,7 @@ The browser play-test runs against an already running preview server using an ex
 
 ~~~sh
 node scripts/verify-browser.mjs
+node scripts/verify-sanctuary.mjs
 ~~~
 
 Set PLAYWRIGHT_MODULE_PATH to its package directory if Playwright is outside this checkout. PREVIEW_URL overrides the default localhost preview.

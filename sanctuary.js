@@ -227,8 +227,8 @@ export function createSanctuary({engine,renderer,active,paused,reduced}){
  function update(dt,stopped){
   const step=Math.min(dt,.06);
   if(!stopped)state.time+=step;
-  if(stopped)state.night=state.nightTarget;else state.night=mix(state.night,state.nightTarget,Math.min(1,step*.7));
-  if(state.tween){
+  if(!stopped)state.night=mix(state.night,state.nightTarget,Math.min(1,step*.7));
+  if(state.tween&&!stopped){
    state.tween.elapsed+=step;const p=clamp(state.tween.elapsed/1.8,0,1),e=p*p*(3-2*p),{from,to}=state.tween;
    state.focus.lerpVectors(from.focus,to.focus,e);state.span=mix(from.span,to.span,e);state.yaw=mix(from.yaw,to.yaw,e);state.pitch=mix(from.pitch,to.pitch,e);state.framing=mix(from.framing,to.framing,e);
    if(p===1)state.tween=null;
