@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import { createSanctuary } from './sanctuary.js';
 
 const worlds=['Pale Frontier','Sleeping Sun','Lunar Shore','Crimson Oath','Blue Hour'];
 const echoes=[
@@ -35,7 +36,7 @@ export async function initObservatory(api){
  const engine=await loadEngine();
  let discoveries=[];
  try{discoveries=validDiscoveries(JSON.parse(localStorage.getItem(storageKey)||'[]'));}catch{}
- let mode='map',selected=-1,signal=0,hold=0,toastTimer,flight;
+ let mode='map',selected=-1,signal=0,hold=0,toastTimer,flight,sanctuary;
  let simulationTime=0,lastTime=0,lastRender=0,flash=0,compact=innerWidth<=600||innerWidth/innerHeight<.86,mapHover=false;
  const labels=[],planets=[],meshes=[],probes=[];
  const canvas=$('#universe-canvas'),scene=new THREE.Scene(),system=new THREE.Group(),starGroup=new THREE.Group(),probeGroup=new THREE.Group();
@@ -120,6 +121,7 @@ export async function initObservatory(api){
   if(mode!=='flight')camera.position.copy(defaultCamera).multiplyScalar(view.zoom);
   system.position.x=compact?0:2.05;system.children.filter(child=>child.userData.orbit).forEach(child=>child.visible=!compact);armillary.visible=!compact;
   renderer?.setSize(innerWidth,innerHeight,false);camera.lookAt(focus);if(mode==='field')positionProbes();
+  sanctuary?.resize();
  }
  function updatePlanets(){
   JSON.parse(engine.frame(simulationTime,compact)).forEach((p,i)=>{planets[i].group.position.set(p.x,p.y,p.z);planets[i].sphere.rotation.y=p.spin;});
@@ -191,15 +193,33 @@ export async function initObservatory(api){
   $('#field-ui .back-map').focus({preventScroll:true});$('#announcement').textContent='Landed on '+worlds[index]+'. Find three glimmers and tune their signals.';
  }
  function returnToMap(){
-  if(mode==='flight')return;const wasField=mode==='field';mode='map';selected=-1;hold=0;flash=0;formations.forEach(group=>group.visible=false);$('#stage').inert=true;$('#field-ui').hidden=true;
+  if(mode==='flight')return;const wasField=mode==='field',wasSanctuary=mode==='sanctuary';mode='map';selected=-1;hold=0;flash=0;formations.forEach(group=>group.visible=false);$('#stage').inert=true;$('#field-ui').hidden=true;
+  sanctuary?.deactivate();$('#sanctuary-ui').hidden=true;document.body.classList.remove('in-sanctuary');
+  $('#universe-canvas').setAttribute('aria-label','A three-dimensional star system. Use the planet buttons to land.');
   document.body.classList.remove('exploring');document.body.classList.add('in-observatory');$('#observatory').removeAttribute('aria-hidden');system.visible=true;starGroup.visible=true;probeGroup.visible=false;labels.forEach(button=>button.disabled=false);
   camera.position.copy(defaultCamera).multiplyScalar(view.zoom);camera.lookAt(focus);history.replaceState(null,'','#observatory');document.querySelector('meta[name="theme-color"]').content='#102423';updateProgress();
   if(wasField)labels[api.current()].focus({preventScroll:true});
+  else if(wasSanctuary)$('[data-sanctuary]').focus({preventScroll:true});
  }
+ function enterSanctuary({initial=false}={}){
+  if(mode==='flight')return;
+  if(!renderer){$('#map-status').textContent='The voxel sanctuary needs WebGL. The five worlds are still open to you.';$('#announcement').textContent=$('#map-status').textContent;return;}
+  if(!sanctuary)sanctuary=createSanctuary({engine,renderer,active:()=>mode==='sanctuary',paused:api.paused,reduced:api.reduced});
+  mode='sanctuary';selected=-1;hold=0;drag=null;formations.forEach(group=>group.visible=false);
+  document.body.classList.remove('in-observatory','exploring');document.body.classList.add('in-sanctuary');
+  $('#stage').inert=true;$('#field-ui').hidden=true;$('#sanctuary-ui').hidden=false;$('#observatory').removeAttribute('aria-hidden');
+  $('#universe-canvas').setAttribute('aria-label','A floating voxel island with an astronomical tower, telescope, windmill, spacecraft, bridge and a glowing waterfall. Drag to orbit.');
+  labels.forEach(button=>button.disabled=true);sanctuary.activate();history.replaceState(null,'','#sanctuary');
+  if(!initial)$('#sanctuary-ui .back-map').focus({preventScroll:true});$('#announcement').textContent='The Drifting Observatory. Drag to orbit, inspect a landmark, or change the sky.';
+ }
+ document.querySelectorAll('[data-sanctuary]').forEach(button=>button.addEventListener('click',enterSanctuary));
+ document.querySelectorAll('[data-voxel-focus]').forEach(button=>button.addEventListener('click',()=>sanctuary?.focus(button.dataset.voxelFocus)));
+ $('#sanctuary-reset').addEventListener('click',()=>sanctuary?.focus('wide'));
+ $('#sanctuary-sky').addEventListener('click',()=>sanctuary?.toggleSky());
  $('#frequency').addEventListener('input',updateSignal);$('#dismiss-instrument').addEventListener('click',dismissInstrument);
  document.querySelectorAll('[data-map]').forEach(button=>button.addEventListener('click',returnToMap));$('.wordmark').addEventListener('click',event=>{event.preventDefault();returnToMap();});
  $('#reset-orbit').addEventListener('click',()=>{view.yaw=0;view.pitch=0;view.zoom=1;resize();});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]')&&mode==='field'){if(selected>=0)dismissInstrument();else returnToMap();}});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]')){if(mode==='field'){if(selected>=0)dismissInstrument();else returnToMap();}else if(mode==='sanctuary')returnToMap();}});
  let fontStylePromise;
  const fontStyle=()=>fontStylePromise ||= Promise.all(['bodoni-moda.ttf','bodoni-moda-italic.ttf'].map(async(filename,i)=>{
   const response=await fetch('fonts/'+filename);if(!response.ok)throw new Error('Poster font unavailable');const bytes=new Uint8Array(await response.arrayBuffer());let binary='';
@@ -244,11 +264,14 @@ export async function initObservatory(api){
     group.visible=i===api.current()&&selected>=0&&(signal>.2||discoveries.includes(selected));
     if(group.visible){group.position.copy(probes[selected%3].group.position);group.scale.setScalar(.5+signal*.8+flash*.8);if(!api.paused()&&!modal)group.rotation.z+=dt*[.1,.15,-.18,-.12,.2][i];}
    });
+  }else if(mode==='sanctuary'){
+   sanctuary.update(dt*2,api.paused()||modal);
   }
-  if(!modal)renderer?.render(scene,camera);
+  if(!modal){if(mode==='sanctuary')renderer.render(sanctuary.scene,sanctuary.camera);else renderer?.render(scene,camera);}
  }
  resize();updatePlanets();positionLabels();updateProgress();$('#map-status').textContent=renderer?'Drag to orbit · Choose a world to land':'Choose a world to land · 3D unavailable in this browser';
  requestAnimationFrame(tick);document.body.dataset.engine='go-wasm';document.body.dataset.renderer=renderer?'webgl':'flat';
  const initial=Number(location.hash.match(/^#world-0([1-5])$/)?.[1]);if(initial)land(initial-1);
+ else if(location.hash==='#sanctuary')enterSanctuary({initial:true});
 }
 

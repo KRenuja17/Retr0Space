@@ -26,6 +26,10 @@ func main() {
 		return string(data)
 	})
 	bind(object, "resonance", func(_ js.Value, args []js.Value) any { return core.Resonance(args[0].Int(), args[1].Float()) })
+	bind(object, "terrain", func(_ js.Value, args []js.Value) any {
+		data, _ := json.Marshal(core.VoxelTerrain(args[0].Int(), args[1].Int()))
+		return string(data)
+	})
 	bind(object, "poster", func(_ js.Value, args []js.Value) any {
 		var ids []int
 		json.Unmarshal([]byte(args[0].String()), &ids)

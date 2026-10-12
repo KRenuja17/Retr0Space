@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..');
-const files = ['app.js', 'observatory.js', 'scripts/build-engine.mjs', 'scripts/build.mjs', 'scripts/dev.mjs'];
+const files = ['app.js', 'observatory.js', 'sanctuary.js', 'scripts/build-engine.mjs', 'scripts/build.mjs', 'scripts/dev.mjs'];
 for (const file of files) {
   const check = spawnSync(process.execPath, ['--check', resolve(root, file)], { encoding: 'utf8' });
   if (check.status !== 0) throw new Error(check.stderr);

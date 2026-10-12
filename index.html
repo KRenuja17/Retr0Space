@@ -29,6 +29,7 @@
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <button class="nav-link" data-map>Observatory</button>
+        <button class="nav-link sanctuary-link" data-sanctuary>Sanctuary ↗</button>
         <button class="nav-link" data-open="journal">Field journal <span class="nav-count" id="journal-count">00 / 15</span></button>
       </nav>
       <div class="experience-controls">
@@ -88,6 +89,14 @@
         <div class="range-marks" aria-hidden="true"><span>00</span><span>50</span><span>100</span></div>
       </div>
       <div class="discovery-toast" id="discovery-toast" role="status"></div>
+    </section>
+    <section class="sanctuary-ui" id="sanctuary-ui" aria-labelledby="sanctuary-title" hidden>
+      <div class="sanctuary-heading"><button class="back-map" data-map>← Return to orbit</button><h2 id="sanctuary-title">The Drifting<br><em>Observatory.</em></h2><p>A small world, adrift.</p></div>
+      <div class="sanctuary-bottom">
+        <span class="sanctuary-hint">Drag to orbit · Scroll to look closer</span>
+        <div class="sanctuary-landmarks" role="group" aria-label="Inspect a landmark"><button data-voxel-focus="telescope" aria-pressed="false">The telescope</button><button data-voxel-focus="landing" aria-pressed="false">The landing</button><button data-voxel-focus="waterfall" aria-pressed="false">The blue fall</button></div>
+        <div class="sanctuary-controls"><button id="sanctuary-sky" aria-label="Change between day and night" aria-pressed="false">Daybreak ◯</button><button id="sanctuary-reset" aria-label="Reset the sanctuary view">↺</button></div>
+      </div>
     </section>
     <div class="flight-veil" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
     <p class="sr-only" id="announcement" aria-live="polite" aria-atomic="true"></p>
